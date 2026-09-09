@@ -17,10 +17,13 @@ import AdminPanel from './components/AdminPanel';
 import Toast from './components/Toast';
 
 const TRACKS = [
-  'https://videotourl.com/audio/1788966590049-a2ac9e4d-1a4d-469f-b9a0-c6a873dfa743.mp3',
-  'https://videotourl.com/audio/1788966579029-953def23-b443-4d2d-9df5-3ff3dcddf4ea.mp3',
-  'https://videotourl.com/audio/1788966547430-80ebcfe6-99e7-4604-a527-52dcf99d9c5a.mp3',
+  "https://videotourl.com/audio/1788966590049-a2ac9e4d-1a4d-469f-b9a0-c6a873dfa743.mp3",
+  "https://videotourl.com/audio/1788977518911-95c68b5c-35e2-4c8a-8390-d965ea3083fa.mp3",
+  "https://videotourl.com/audio/1788977556485-4320f3b0-f87c-4791-8510-ab78e8fc22e9.mp3"
 ];
+
+// Change this to your preferred website title
+const WEBSITE_TITLE = "Your Name | Portfolio"; 
 
 export default function App() {
   const [items, setItems] = useState<WorkItem[]>([]);
@@ -35,17 +38,32 @@ export default function App() {
   const [toasts, setToasts] = useState<ToastMsg[]>([]);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const currentTrackIndexRef = useRef<number>(Math.floor(Math.random() * TRACKS.length));
   const [audioPlaying, setAudioPlaying] = useState(false);
   const [volume, setVolume] = useState(0.15);
   const [soundHintVisible, setSoundHintVisible] = useState(true);
 
-  // ── Audio init ──────────────────────────────────────────────
+  // ── Set Website Title ─────────────────────────────────────────
   useEffect(() => {
-    const track = TRACKS[Math.floor(Math.random() * TRACKS.length)];
-    const audio = new Audio(track);
-    audio.loop = true;
-    audio.volume = 0.15;
+    document.title = WEBSITE_TITLE;
+  }, []);
+
+  // ── Audio init & Playlist Progression ─────────────────────────
+  useEffect(() => {
+    const initialTrack = TRACKS[currentTrackIndexRef.current];
+    const audio = new Audio(initialTrack);
+    audio.loop = false; // Disable single track loop to allow auto-play next track
+    audio.volume = volume;
     audioRef.current = audio;
+
+    // Play next track in sequence when current track ends
+    const handleEnded = () => {
+      currentTrackIndexRef.current = (currentTrackIndexRef.current + 1) % TRACKS.length;
+      audio.src = TRACKS[currentTrackIndexRef.current];
+      audio.play().catch(() => {});
+    };
+
+    audio.addEventListener('ended', handleEnded);
 
     const startOnce = () => {
       audio.play().then(() => {
@@ -55,13 +73,40 @@ export default function App() {
       document.removeEventListener('click', startOnce);
       document.removeEventListener('keydown', startOnce);
     };
+
     document.addEventListener('click', startOnce, { once: true });
     document.addEventListener('keydown', startOnce, { once: true });
 
     return () => {
+      audio.removeEventListener('ended', handleEnded);
       audio.pause();
       audio.src = '';
     };
+  }, []);
+
+  // Update volume on audio instance when volume state changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
+
+  // ── Secret Admin Shortcut (Shift + A) ─────────────────────────
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.shiftKey && e.key.toUpperCase() === 'A') {
+        const pass = prompt("Enter Admin Password:");
+        if (pass === "zak56belf") {
+          alert("Admin Access Granted.");
+          setAdminOpen(true);
+        } else if (pass !== null) {
+          alert("Incorrect Admin Password.");
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   // ── Reveal on scroll ────────────────────────────────────────
@@ -82,16 +127,20 @@ export default function App() {
 
   // ── Data loading ────────────────────────────────────────────
   const loadData = useCallback(async () => {
-    const [viewsData, statsData, workData, payData] = await Promise.all([
-      api.views(),
-      api.stats(),
-      api.work(),
-      api.payment(),
-    ]);
-    if (viewsData.views) setViews(viewsData.views);
-    setStats(statsData);
-    setItems(workData);
-    setPayment(payData);
+    try {
+      const [viewsData, statsData, workData, payData] = await Promise.all([
+        api.views(),
+        api.stats(),
+        api.work(),
+        api.payment(),
+      ]);
+      if (viewsData?.views) setViews(viewsData.views);
+      if (statsData) setStats(statsData);
+      if (workData) setItems(workData);
+      if (payData) setPayment(payData);
+    } catch (err) {
+      console.error("Error fetching data:", err);
+    }
   }, []);
 
   useEffect(() => { loadData(); }, [loadData]);
