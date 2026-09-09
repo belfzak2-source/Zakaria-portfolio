@@ -2,9 +2,9 @@ const API_URL = "";
 
 // Tracks specified in the document[cite: 8]
 const audioTracks = [
-    "https://curli-loxxbrilliant-salmon-vjxpiszd.edgeone.dev",
-    "https://ugly-gray-isfeqawv.edgeone.dev",
-    "https://big-orange-dkydoond.edgeone.dev"
+    "https://videotourl.com/audio/1788966590049-a2ac9e4d-1a4d-469f-b9a0-c6a873dfa743.mp3",
+    "https://videotourl.com/audio/1788966579029-953def23-b443-4d2d-9df5-3ff3dcddf4ea.mp3",
+    "https://videotourl.com/audio/1788966547430-80ebcfe6-99e7-4604-a527-52dcf99d9c5a.mp3"
 ];
 
 // Random audio track selection[cite: 8]
