@@ -12,7 +12,10 @@
   },
   "dependencies": {
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "express": "latest",
+    "mongoose": "latest",
+    "cors": "latest"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
