@@ -6,7 +6,7 @@ import fs from 'node:fs'
 
 // Load figma/make/site.json using fs so build tools don't try to import missing files statically
 let siteConfiguration: FigmaSiteConfiguration = {}
-const siteConfigPath = path.resolve(__dirname, '/figma/make/site.json')
+const siteConfigPath = path.resolve(__dirname, './figma/make/site.json')
 
 if (fs.existsSync(siteConfigPath)) {
   try {
