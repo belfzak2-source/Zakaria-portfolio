@@ -1,0 +1,44 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rool-Studio</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- GSAP for Sick Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body>
+    <!-- Background -->
+    <div class="bg-image"></div>
+    <div class="bg-gradient"></div>
+
+    <!-- Top Bar -->
+    <nav class="top-bar">
+        <div class="logo" id="nav-logo">@Rool-Studio</div>
+        <div class="nav-right">
+            <div class="audio-controls">
+                <span id="sound-icon">🔊</span>
+                <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.2">
+            </div>
+            <div class="view-count">
+                <span>👁️ <span id="views">Loading...</span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <h1 class="title">Rool-Studio</h1>
+        <p class="subtitle">A Pretty talented roblox developer make cool stuff Scripting/animating/Ui/Grafics</p>
+        <div class="hero-buttons">
+            <button onclick="scrollToSection('work')">View Our Work</button>
+            <button onclick="scrollToSection('contact')">Get in Touch With Us</button>
+        </div>
+    </header>
+
+    <!-- Add your Stats, Work, and Games sections down here -->
+    
+    <script src="script.js"></script>
+</body>
+</html>
