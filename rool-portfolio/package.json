@@ -1,8 +1,9 @@
 {
-  "name": "figma-make-app",
+  "name": "zakaria-protoprofile",
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "description": "Zakaria ProtoProfile portfolio application",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
