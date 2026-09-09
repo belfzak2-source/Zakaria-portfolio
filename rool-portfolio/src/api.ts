@@ -59,7 +59,16 @@ const saveStoredWork = (items: WorkItem[]) => {
 };
 
 export const api = {
-  views: async () => ({ views: 0 }),
+  views: async () => {
+    try {
+      const current = parseInt(localStorage.getItem('rool_views') || '100', 10);
+      const updated = current + 1;
+      localStorage.setItem('rool_views', updated.toString());
+      return { views: updated };
+    } catch {
+      return { views: 1 };
+    }
+  },
 
   stats: async () => {
     const raw = localStorage.getItem('rool_stats');
