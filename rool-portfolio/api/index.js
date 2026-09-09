@@ -8,14 +8,13 @@ app.use(cors());
 app.use(express.json());
 
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('Connected to MongoDB Atlas'))
+  .then(() => console.log('MongoDB Atlas Connected'))
   .catch(err => console.error('MongoDB Error:', err));
 
-// Schemas
 const WorkSchema = new mongoose.Schema({
   title: String,
   description: String,
-  category: String, // 'Scripting', 'Animations', 'Ui', 'Grafics', 'game'
+  category: String, 
   thumbnailUrl: String,
   videoUrl: String,
   gameLink: String,
@@ -53,7 +52,6 @@ const checkAdmin = (req, res, next) => {
   }
 };
 
-// Routes
 app.get('/api/work', async (req, res) => {
   const items = await WorkItem.find().sort({ createdAt: -1 });
   res.json(items);
@@ -63,11 +61,6 @@ app.post('/api/work', checkAdmin, async (req, res) => {
   const newItem = new WorkItem(req.body);
   await newItem.save();
   res.status(201).json({ message: 'Saved successfully', item: newItem });
-});
-
-app.delete('/api/work/:id', checkAdmin, async (req, res) => {
-  await WorkItem.findByIdAndDelete(req.params.id);
-  res.json({ message: 'Deleted successfully' });
 });
 
 app.get('/api/stats', async (req, res) => {
@@ -104,12 +97,18 @@ app.post('/api/payment', checkAdmin, async (req, res) => {
   res.json(pay);
 });
 
+// Atomic increment for views[cite: 8]
 app.post('/api/views', async (req, res) => {
-  let record = await View.findOne();
-  if (!record) record = new View({ views: 0 });
-  record.views += 1;
-  await record.save();
-  res.json({ views: record.views });
+  try {
+    const record = await View.findOneAndUpdate(
+      {},
+      { $inc: { views: 1 } },
+      { upsert: true, new: true }
+    );
+    res.json({ views: record.views });
+  } catch (err) {
+    res.status(500).json({ views: 0, error: err.message });
+  }
 });
 
 module.exports = app;
