@@ -1,7 +1,5 @@
 import type { WorkItem, Stats, Payment } from './types';
 
-const BASE = (import.meta as any).env?.VITE_API_URL ?? '';
-
 const MOCK_ITEMS: WorkItem[] = [
   {
     _id: 'm1', title: 'Combat System', category: 'Scripting',
@@ -41,35 +39,77 @@ const MOCK_ITEMS: WorkItem[] = [
   },
 ];
 
-const MOCK_STATS: Stats = { gamesMade: '12', visitCount: '4.2K', experienceYears: '3+ Yrs' };
-const MOCK_PAYMENT: Payment = { paypal: 'belfzak2@gmail.com', robux: 'Group Funds / Gamepass', bank: 'DM for wire details' };
+const STORAGE_KEY = 'rool_work_items';
 
-async function tryFetch<T>(url: string, opts?: RequestInit, fallback?: T): Promise<T> {
+const getStoredWork = (): WorkItem[] => {
   try {
-    const res = await fetch(`${BASE}${url}`, opts);
-    if (!res.ok) throw new Error(String(res.status));
-    return res.json() as Promise<T>;
+    const data = localStorage.getItem(STORAGE_KEY);
+    if (!data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(MOCK_ITEMS));
+      return MOCK_ITEMS;
+    }
+    return JSON.parse(data);
   } catch {
-    if (fallback !== undefined) return fallback;
-    throw new Error('API unavailable');
+    return MOCK_ITEMS;
   }
-}
+};
+
+const saveStoredWork = (items: WorkItem[]) => {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+};
 
 export const api = {
-  views: () => tryFetch<{ views: number }>('/api/views', { method: 'POST' }, { views: 0 }),
-  stats: () => tryFetch<Stats>('/api/stats', undefined, MOCK_STATS),
-  work: () => tryFetch<WorkItem[]>('/api/work', undefined, MOCK_ITEMS),
-  payment: () => tryFetch<Payment>('/api/payment', undefined, MOCK_PAYMENT),
+  views: async () => ({ views: 0 }),
 
-  updateStats: (data: Record<string, string>) =>
-    fetch(`${BASE}/api/stats`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }),
+  stats: async () => {
+    const raw = localStorage.getItem('rool_stats');
+    return raw ? JSON.parse(raw) : { gamesMade: '12', visitCount: '4.2K', experienceYears: '3+ Yrs' };
+  },
 
-  publishWork: (data: Record<string, string>) =>
-    fetch(`${BASE}/api/work`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }),
+  work: async () => {
+    return getStoredWork();
+  },
 
-  deleteWork: (id: string, password: string) =>
-    fetch(`${BASE}/api/work/${id}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password }) }),
+  payment: async () => {
+    const raw = localStorage.getItem('rool_payment');
+    return raw ? JSON.parse(raw) : { paypal: 'belfzak2@gmail.com', robux: 'Group Funds / Gamepass', bank: 'DM for wire details' };
+  },
 
-  updatePayment: (data: Record<string, string>) =>
-    fetch(`${BASE}/api/payment`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }),
+  publishWork: async (data: any) => {
+    if (data.password !== 'zak56belf') return { ok: false };
+    const current = getStoredWork();
+    const newItem: WorkItem = {
+      _id: Date.now().toString(),
+      title: data.title,
+      category: data.category,
+      role: data.role,
+      thumbnailUrl: data.thumbnailUrl,
+      videoUrl: data.videoUrl,
+      gameLink: data.gameLink,
+      description: data.description,
+      createdAt: new Date().toISOString(),
+    };
+    saveStoredWork([newItem, ...current]);
+    return { ok: true };
+  },
+
+  deleteWork: async (id: string, password: string) => {
+    if (password !== 'zak56belf') return { ok: false };
+    const current = getStoredWork();
+    const updated = current.filter(item => item._id !== id);
+    saveStoredWork(updated);
+    return { ok: true };
+  },
+
+  updateStats: async (data: any) => {
+    if (data.password !== 'zak56belf') return { ok: false };
+    localStorage.setItem('rool_stats', JSON.stringify(data));
+    return { ok: true };
+  },
+
+  updatePayment: async (data: any) => {
+    if (data.password !== 'zak56belf') return { ok: false };
+    localStorage.setItem('rool_payment', JSON.stringify(data));
+    return { ok: true };
+  }
 };
