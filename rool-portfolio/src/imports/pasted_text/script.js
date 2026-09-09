@@ -1,17 +1,28 @@
 const API_URL = ""; 
 
-// Tracks specified in the document[cite: 8]
+// Tracks specified in the document
 const audioTracks = [
     "https://videotourl.com/audio/1788966590049-a2ac9e4d-1a4d-469f-b9a0-c6a873dfa743.mp3",
-    "https://videotourl.com/audio/1788966579029-953def23-b443-4d2d-9df5-3ff3dcddf4ea.mp3",
-    "https://videotourl.com/audio/1788966547430-80ebcfe6-99e7-4604-a527-52dcf99d9c5a.mp3"
+    "https://videotourl.com/audio/1788977518911-95c68b5c-35e2-4c8a-8390-d965ea3083fa.mp3",
+    "https://videotourl.com/audio/1788977556485-4320f3b0-f87c-4791-8510-ab78e8fc22e9.mp3"
 ];
 
-// Random audio track selection[cite: 8]
-const randomTrack = audioTracks[Math.floor(Math.random() * audioTracks.length)];
-const bgMusic = new Audio(randomTrack);
-bgMusic.loop = true;
-bgMusic.volume = 0.15; // Lower initial volume[cite: 8]
+// Pick a random starting index
+let currentTrackIndex = Math.floor(Math.random() * audioTracks.length);
+
+const bgMusic = new Audio(audioTracks[currentTrackIndex]);
+bgMusic.loop = false; // Disable single track loop to allow playlist progression
+bgMusic.volume = 0.15; // Lower initial volume
+
+// Function to advance and play the next track in sequence
+function playNextTrack() {
+    currentTrackIndex = (currentTrackIndex + 1) % audioTracks.length;
+    bgMusic.src = audioTracks[currentTrackIndex];
+    bgMusic.play().catch(() => {});
+}
+
+// Play next track automatically when current track ends
+bgMusic.addEventListener('ended', playNextTrack);
 
 let audioStarted = false;
 function startAudio() {
@@ -24,7 +35,7 @@ function startAudio() {
 document.addEventListener('click', startAudio, { once: true });
 document.addEventListener('keydown', startAudio, { once: true });
 
-// Volume slider handler[cite: 8]
+// Volume slider handler
 const volumeSlider = document.getElementById('volume-slider');
 if (volumeSlider) {
     volumeSlider.addEventListener('input', (e) => {
@@ -32,12 +43,12 @@ if (volumeSlider) {
     });
 }
 
-// Secret Admin Access via Shift + A[cite: 8]
+// Secret Admin Access via Shift + A
 let adminAuthToken = "";
 
 document.addEventListener('keydown', (e) => {
     if (e.shiftKey && e.key.toUpperCase() === 'A') {
-        const pass = prompt("Enter Admin Password:"); // Password: zak56belf[cite: 8]
+        const pass = prompt("Enter Admin Password:"); // Password: zak56belf
         if (pass === "zak56belf") {
             adminAuthToken = pass;
             alert("Admin Access Granted.");
@@ -61,7 +72,7 @@ function switchAdminTab(tab) {
     document.getElementById(`admin-tab-${tab}`).classList.remove('hidden');
 }
 
-// Smooth scroll helper[cite: 8]
+// Smooth scroll helper
 function scrollToSection(id) {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: 'smooth' });
@@ -69,7 +80,7 @@ function scrollToSection(id) {
 
 let allWorkItems = [];
 
-// Load data & increment view count atomically[cite: 8]
+// Load data & increment view count atomically
 async function loadData() {
     try {
         const viewsRes = await fetch(`${API_URL}/api/views`, { method: 'POST' });
@@ -129,7 +140,7 @@ function renderWorkItems(items) {
     });
 }
 
-// Category Filtering[cite: 8]
+// Category Filtering
 function filterCategory(category, btnEl) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     if (btnEl) btnEl.classList.add('active');
@@ -149,7 +160,7 @@ function resetWorkView() {
     filterCategory('all', document.querySelector('.tab-btn'));
 }
 
-// Roblox style game modal popup[cite: 8]
+// Roblox style game modal popup
 function openModal(item) {
     const modal = document.getElementById('item-modal');
     const video = document.getElementById('modal-video');
@@ -185,7 +196,7 @@ function closeModal() {
     document.getElementById('modal-video').pause();
 }
 
-// Admin Submissions[cite: 8]
+// Admin Submissions
 async function submitAdminStats() {
     const res = await fetch(`${API_URL}/api/stats`, {
         method: 'POST',
@@ -235,7 +246,7 @@ async function submitAdminPayment() {
     if (res.ok) alert("Payment Details Updated!");
 }
 
-// GSAP Entrance Animations[cite: 8]
+// GSAP Entrance Animations
 gsap.from(".title", { duration: 1.2, y: -40, opacity: 0, ease: "power3.out" });
 gsap.from(".subtitle", { duration: 1.2, opacity: 0, delay: 0.3 });
 gsap.from(".hero-buttons", { duration: 1, opacity: 0, delay: 0.6 });
