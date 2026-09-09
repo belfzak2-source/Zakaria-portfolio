@@ -59,14 +59,26 @@ const saveStoredWork = (items: WorkItem[]) => {
 };
 
 export const api = {
-  views: async () => {
+views: async () => {
     try {
-      const current = parseInt(localStorage.getItem('rool_views') || '100', 10);
-      const updated = current + 1;
-      localStorage.setItem('rool_views', updated.toString());
-      return { views: updated };
+      // 1. Get current views (Defaults to 0)
+      let currentViews = parseInt(localStorage.getItem('rool_views') || '0', 10);
+      
+      // 2. Check the time lock
+      const lastViewTime = localStorage.getItem('last_view_time');
+      const now = Date.now();
+      const ONE_DAY = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+      // 3. If they never visited OR 24 hours have passed -> Add +1
+      if (!lastViewTime || now - parseInt(lastViewTime, 10) >= ONE_DAY) {
+        currentViews += 1;
+        localStorage.setItem('rool_views', currentViews.toString());
+        localStorage.setItem('last_view_time', now.toString()); // Lock it for next 24 hours
+      }
+
+      return { views: currentViews };
     } catch {
-      return { views: 1 };
+      return { views: 0 };
     }
   },
 
