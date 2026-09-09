@@ -1,21 +1,30 @@
-const API_URL = ""; // Automatically targets Vercel /api routes
+const API_URL = ""; 
 
-// Looped Music Pool
+// Tracks specified in the document[cite: 8]
 const audioTracks = [
     "https://curli-loxxbrilliant-salmon-vjxpiszd.edgeone.dev",
     "https://ugly-gray-isfeqawv.edgeone.dev",
     "https://big-orange-dkydoond.edgeone.dev"
 ];
 
+// Random audio track selection[cite: 8]
 const randomTrack = audioTracks[Math.floor(Math.random() * audioTracks.length)];
 const bgMusic = new Audio(randomTrack);
 bgMusic.loop = true;
-bgMusic.volume = 0.2;
+bgMusic.volume = 0.15; // Lower initial volume[cite: 8]
 
-document.body.addEventListener('click', () => {
-    if (bgMusic.paused) bgMusic.play().catch(() => {});
-}, { once: true });
+let audioStarted = false;
+function startAudio() {
+    if (!audioStarted) {
+        bgMusic.play().then(() => {
+            audioStarted = true;
+        }).catch(() => {});
+    }
+}
+document.addEventListener('click', startAudio, { once: true });
+document.addEventListener('keydown', startAudio, { once: true });
 
+// Volume slider handler[cite: 8]
 const volumeSlider = document.getElementById('volume-slider');
 if (volumeSlider) {
     volumeSlider.addEventListener('input', (e) => {
@@ -23,36 +32,64 @@ if (volumeSlider) {
     });
 }
 
+// Secret Admin Access via Shift + A[cite: 8]
+let adminAuthToken = "";
+
+document.addEventListener('keydown', (e) => {
+    if (e.shiftKey && e.key.toUpperCase() === 'A') {
+        const pass = prompt("Enter Admin Password:"); // Password: zak56belf[cite: 8]
+        if (pass === "zak56belf") {
+            adminAuthToken = pass;
+            alert("Admin Access Granted.");
+            openAdminModal();
+        } else if (pass !== null) {
+            alert("Incorrect Admin Password.");
+        }
+    }
+});
+
+function openAdminModal() {
+    document.getElementById('admin-modal').classList.remove('hidden');
+}
+
+function closeAdminModal() {
+    document.getElementById('admin-modal').classList.add('hidden');
+}
+
+function switchAdminTab(tab) {
+    document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.add('hidden'));
+    document.getElementById(`admin-tab-${tab}`).classList.remove('hidden');
+}
+
+// Smooth scroll helper[cite: 8]
 function scrollToSection(id) {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: 'smooth' });
 }
 
-// Global data store
 let allWorkItems = [];
 
+// Load data & increment view count atomically[cite: 8]
 async function loadData() {
     try {
-        // Increment and get views
         const viewsRes = await fetch(`${API_URL}/api/views`, { method: 'POST' });
         const viewsData = await viewsRes.json();
-        document.getElementById('views-count').innerText = viewsData.views || 0;
+        document.getElementById('views-count').innerText = viewsData.views || 1;
 
-        // Fetch stats
         const statsRes = await fetch(`${API_URL}/api/stats`);
         const statsData = await statsRes.json();
         if (statsData) {
-            document.getElementById('stat-games').innerText = statsData.gamesMade || 0;
-            document.getElementById('stat-visits').innerText = statsData.visitCount || 0;
-            document.getElementById('stat-experience').innerText = statsData.experienceYears || 0;
+            document.getElementById('stat-games').innerText = statsData.gamesMade || '0';
+            document.getElementById('stat-visits').innerText = statsData.visitCount || '0';
+            document.getElementById('stat-experience').innerText = statsData.experienceYears || '0';
         }
 
-        // Fetch portfolio items
         const workRes = await fetch(`${API_URL}/api/work`);
         allWorkItems = await workRes.json();
-        renderWorkItems(allWorkItems);
+        if (Array.isArray(allWorkItems)) {
+            renderWorkItems(allWorkItems);
+        }
 
-        // Fetch payment details
         const payRes = await fetch(`${API_URL}/api/payment`);
         const payData = await payRes.json();
         if (payData) {
@@ -92,9 +129,10 @@ function renderWorkItems(items) {
     });
 }
 
-function filterCategory(category) {
+// Category Filtering[cite: 8]
+function filterCategory(category, btnEl) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
+    if (btnEl) btnEl.classList.add('active');
 
     document.getElementById('back-btn').classList.remove('hidden');
 
@@ -108,9 +146,10 @@ function filterCategory(category) {
 
 function resetWorkView() {
     document.getElementById('back-btn').classList.add('hidden');
-    filterCategory('all');
+    filterCategory('all', document.querySelector('.tab-btn'));
 }
 
+// Roblox style game modal popup[cite: 8]
 function openModal(item) {
     const modal = document.getElementById('item-modal');
     const video = document.getElementById('modal-video');
@@ -146,7 +185,57 @@ function closeModal() {
     document.getElementById('modal-video').pause();
 }
 
-// GSAP Animations
+// Admin Submissions[cite: 8]
+async function submitAdminStats() {
+    const res = await fetch(`${API_URL}/api/stats`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            password: adminAuthToken,
+            gamesMade: document.getElementById('adm-gamesMade').value,
+            visitCount: document.getElementById('adm-visitCount').value,
+            experienceYears: document.getElementById('adm-experienceYears').value
+        })
+    });
+    if (res.ok) alert("Stats Updated!");
+}
+
+async function submitAdminWork() {
+    const res = await fetch(`${API_URL}/api/work`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            password: adminAuthToken,
+            title: document.getElementById('adm-title').value,
+            category: document.getElementById('adm-category').value,
+            role: document.getElementById('adm-role').value,
+            thumbnailUrl: document.getElementById('adm-thumbnailUrl').value,
+            videoUrl: document.getElementById('adm-videoUrl').value,
+            gameLink: document.getElementById('adm-gameLink').value,
+            description: document.getElementById('adm-description').value
+        })
+    });
+    if (res.ok) {
+        alert("Published Successfully!");
+        loadData();
+    }
+}
+
+async function submitAdminPayment() {
+    const res = await fetch(`${API_URL}/api/payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            password: adminAuthToken,
+            paypal: document.getElementById('adm-paypal').value,
+            robux: document.getElementById('adm-robux').value,
+            bank: document.getElementById('adm-bank').value
+        })
+    });
+    if (res.ok) alert("Payment Details Updated!");
+}
+
+// GSAP Entrance Animations[cite: 8]
 gsap.from(".title", { duration: 1.2, y: -40, opacity: 0, ease: "power3.out" });
 gsap.from(".subtitle", { duration: 1.2, opacity: 0, delay: 0.3 });
 gsap.from(".hero-buttons", { duration: 1, opacity: 0, delay: 0.6 });
