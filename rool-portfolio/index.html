@@ -9,6 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 </head>
 <body>
+    <!-- Background Image & Dark Gradient Overlay -->
     <div class="bg-image"></div>
     <div class="bg-gradient"></div>
 
@@ -22,14 +23,14 @@
             <div class="logo" id="nav-logo">@Rool-Studio</div>
         </div>
         <div class="nav-right">
-            <div class="audio-controls">
+            <div class="audio-controls" title="Hover to change volume">
                 <span class="icon-wrapper">
                     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
                 </span>
-                <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.2">
+                <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.15">
             </div>
             <div class="divider">|</div>
-            <div class="view-count">
+            <div class="view-count" title="Total Website Visits">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                 <span id="views-count">...</span>
             </div>
@@ -51,28 +52,28 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <h3 id="stat-games">0</h3>
-                <p>Games Made</p>
+                <p>Game made</p>
             </div>
             <div class="stat-card">
                 <h3 id="stat-visits">0</h3>
-                <p>Visit Count</p>
+                <p>Visit count</p>
             </div>
             <div class="stat-card">
                 <h3 id="stat-experience">0</h3>
-                <p>Years Experience</p>
+                <p>Experience</p>
             </div>
         </div>
     </section>
 
-    <!-- Commissions / Work Section -->
+    <!-- Commissions & Showcase Section -->
     <section class="section" id="work-section">
         <h2 class="section-title">Commissions & Showcase</h2>
         <div class="category-tabs">
-            <button class="tab-btn active" onclick="filterCategory('all')">All</button>
-            <button class="tab-btn" onclick="filterCategory('Scripting')">Scripting</button>
-            <button class="tab-btn" onclick="filterCategory('Animations')">Animations</button>
-            <button class="tab-btn" onclick="filterCategory('Ui')">UI</button>
-            <button class="tab-btn" onclick="filterCategory('Grafics')">Graphics</button>
+            <button class="tab-btn active" onclick="filterCategory('all', this)">All</button>
+            <button class="tab-btn" onclick="filterCategory('Scripting', this)">Scripting</button>
+            <button class="tab-btn" onclick="filterCategory('Animations', this)">Animations</button>
+            <button class="tab-btn" onclick="filterCategory('Ui', this)">Ui</button>
+            <button class="tab-btn" onclick="filterCategory('Grafics', this)">Grafics</button>
         </div>
         <div class="card-grid" id="commissions-grid"></div>
     </section>
@@ -83,7 +84,7 @@
         <div class="card-grid" id="games-grid"></div>
     </section>
 
-    <!-- Payment Methods Section -->
+    <!-- Payment Section -->
     <section class="section" id="payment-section">
         <h2 class="section-title">Accepted Payment Methods</h2>
         <div class="payment-grid" id="payment-grid">
@@ -102,7 +103,7 @@
         </div>
     </section>
 
-    <!-- Contact Section -->
+    <!-- Get In Touch Section -->
     <section class="section" id="contact-section">
         <h2 class="section-title">Get in Touch With Us</h2>
         <div class="contact-container">
@@ -117,19 +118,71 @@
         </div>
     </section>
 
-    <!-- Roblox Game-Style Detail Modal -->
+    <!-- Roblox Game Page Style Modal -->
     <div class="modal-overlay hidden" id="item-modal">
-        <div class="modal-content">
+        <div class="modal-content roblox-style">
             <button class="modal-close" onclick="closeModal()">×</button>
             <div class="modal-media">
                 <video id="modal-video" controls autoplay loop muted></video>
-                <img id="modal-image" src="" alt="Work Preview">
+                <img id="modal-image" src="" alt="Preview">
             </div>
             <div class="modal-details">
                 <h2 id="modal-title">Item Title</h2>
-                <span class="modal-badge" id="modal-role">Role</span>
-                <p id="modal-description">Description goes here...</p>
-                <a id="modal-game-link" href="#" target="_blank" class="btn btn-primary hidden">Play Game</a>
+                <div class="modal-meta">
+                    <span class="modal-badge" id="modal-role">Role</span>
+                </div>
+                <p id="modal-description">Description...</p>
+                <a id="modal-game-link" href="#" target="_blank" class="btn btn-roblox hidden">Play on Roblox</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden In-Page Admin Modal (Triggered by Shift + A) -->
+    <div class="modal-overlay hidden" id="admin-modal">
+        <div class="modal-content admin-style">
+            <button class="modal-close" onclick="closeAdminModal()">×</button>
+            <h2>Rool-Studio Admin Panel</h2>
+            <div class="admin-tabs">
+                <button class="tab-btn active" onclick="switchAdminTab('stats')">Stats</button>
+                <button class="tab-btn" onclick="switchAdminTab('add-work')">Add Commission/Game</button>
+                <button class="tab-btn" onclick="switchAdminTab('payment')">Payment Methods</button>
+            </div>
+
+            <!-- Stats Tab -->
+            <div id="admin-tab-stats" class="admin-tab-content">
+                <h3>Update Public Stats</h3>
+                <input type="text" id="adm-gamesMade" placeholder="Games Made (e.g. 15)">
+                <input type="text" id="adm-visitCount" placeholder="Visit Count (e.g. 2.4M)">
+                <input type="text" id="adm-experienceYears" placeholder="Experience (e.g. 5 Years)">
+                <button class="btn btn-primary" onclick="submitAdminStats()">Save Stats</button>
+            </div>
+
+            <!-- Add Item Tab -->
+            <div id="admin-tab-add-work" class="admin-tab-content hidden">
+                <h3>Publish New Work or Game</h3>
+                <input type="text" id="adm-title" placeholder="Title">
+                <select id="adm-category">
+                    <option value="Scripting">Scripting</option>
+                    <option value="Animations">Animations</option>
+                    <option value="Ui">Ui</option>
+                    <option value="Grafics">Grafics</option>
+                    <option value="game">Made Game</option>
+                </select>
+                <input type="text" id="adm-role" placeholder="Role / % (e.g. Solo, 50% Scripter)">
+                <input type="text" id="adm-thumbnailUrl" placeholder="Thumbnail Image URL">
+                <input type="text" id="adm-videoUrl" placeholder="Video Loop URL (Optional)">
+                <input type="text" id="adm-gameLink" placeholder="Roblox Game Link (Optional)">
+                <textarea id="adm-description" placeholder="Description"></textarea>
+                <button class="btn btn-primary" onclick="submitAdminWork()">Publish Item</button>
+            </div>
+
+            <!-- Payment Methods Tab -->
+            <div id="admin-tab-payment" class="admin-tab-content hidden">
+                <h3>Update Payment Methods</h3>
+                <input type="text" id="adm-paypal" placeholder="PayPal Details">
+                <input type="text" id="adm-robux" placeholder="Robux Details">
+                <input type="text" id="adm-bank" placeholder="Bank Transfer Details">
+                <button class="btn btn-primary" onclick="submitAdminPayment()">Save Payment Info</button>
             </div>
         </div>
     </div>
