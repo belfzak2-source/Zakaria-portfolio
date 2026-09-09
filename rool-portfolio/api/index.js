@@ -1,77 +1,114 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
-require('dotenv').config();
+const mongoose = require('mongoose');
 
 const app = express();
 app.use(cors());
-app.use(express.json()); // Allows your server to read JSON data
+app.use(express.json());
 
-// 1. Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('Connected to MongoDB! Sick!'))
-  .catch(err => console.error('Failed to connect to MongoDB', err));
-
-// 2. Define the Schema (Making sure everything uses Links/URLs)
-const WorkSchema = new mongoose.Schema({
-  title: String,
-  description: String,
-  category: String, // 'commission', 'game', 'ui', etc.
-  thumbnailUrl: String, // You paste the link here in the admin panel
-  videoUrl: String,     // You paste the video link here
-  role: String,         // e.g., "Solo", "50% Scripter"
-  createdAt: { type: Date, default: Date.now }
-});
-
-const WorkItem = mongoose.model('Work', WorkSchema);
-
-// 3. Admin Authentication Middleware
-// This checks if the user provided the correct password before letting them add data
-const checkAdmin = (req, res, next) => {
-  const { password } = req.body;
-  if (password === process.env.ADMIN_PASSWORD) {
-    next(); // Password correct, proceed to save!
-  } else {
-    res.status(401).json({ error: 'Unauthorized. Wrong password bro.' });
+// Serverless MongoDB Connection (Prevents crashing on Vercel)
+let isConnected = false;
+const connectDB = async () => {
+  if (isConnected) return;
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    isConnected = true;
+    console.log('✅ Connected to MongoDB Atlas');
+  } catch (err) {
+    console.error('❌ MongoDB connection error:', err);
   }
 };
 
-// 4. Routes
-
-// GET route: Your main website will call this to load the commissions and games
-app.get('/api/work', async (req, res) => {
-  try {
-    const items = await WorkItem.find().sort({ createdAt: -1 });
-    res.json(items);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch work items' });
-  }
+// Ensure DB is connected before handling any request
+app.use(async (req, res, next) => {
+  await connectDB();
+  next();
 });
 
-// POST route: Your Admin Panel will call this to save new stuff
-// Notice it uses the 'checkAdmin' middleware first!
-app.post('/api/work', checkAdmin, async (req, res) => {
-  try {
-    const { title, description, category, thumbnailUrl, videoUrl, role } = req.body;
-    
-    const newItem = new WorkItem({
-      title,
-      description,
-      category,
-      thumbnailUrl,
-      videoUrl,
-      role
+// --- Database Models ---
+const WorkItem = mongoose.model('WorkItem', new mongoose.Schema({
+  title: String, category: String, role: String,
+  thumbnailUrl: String, videoUrl: String, gameLink: String,
+  description: String, createdAt: { type: Date, default: Date.now }
+}));
+
+const GlobalData = mongoose.model('GlobalData', new mongoose.Schema({
+  views: { type: Number, default: 0 },
+  stats: { gamesMade: String, visitCount: String, experienceYears: String },
+  payment: { paypal: String, robux: String, bank: String }
+}));
+
+async function getGlobalData() {
+  let data = await GlobalData.findOne();
+  if (!data) {
+    data = await GlobalData.create({
+      views: 0,
+      stats: { gamesMade: '0', visitCount: '0', experienceYears: '0' },
+      payment: { paypal: '', robux: '', bank: '' }
     });
-
-    await newItem.save();
-    res.status(201).json({ message: 'Successfully added to portfolio!', item: newItem });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to save item' });
   }
+  return data;
+}
+
+// --- API ENDPOINTS ---
+app.get('/api/stats', async (req, res) => {
+  const data = await getGlobalData();
+  res.json(data.stats);
 });
 
-// 5. Start the Server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+app.post('/api/stats', async (req, res) => {
+  const { password, gamesMade, visitCount, experienceYears } = req.body;
+  if (password !== 'zak56belf') return res.status(401).json({ error: 'Unauthorized' });
+  const data = await getGlobalData();
+  data.stats = { gamesMade, visitCount, experienceYears };
+  await data.save();
+  res.json({ ok: true, stats: data.stats });
 });
+
+app.get('/api/work', async (req, res) => {
+  const items = await WorkItem.find().sort({ createdAt: -1 }); 
+  res.json(items);
+});
+
+app.post('/api/work', async (req, res) => {
+  const { password, title, category, role, thumbnailUrl, videoUrl, gameLink, description } = req.body;
+  if (password !== 'zak56belf') return res.status(401).json({ error: 'Unauthorized' });
+  const newItem = await WorkItem.create({ title, category, role, thumbnailUrl, videoUrl, gameLink, description });
+  res.json({ ok: true, item: newItem });
+});
+
+app.delete('/api/work/:id', async (req, res) => {
+  const { password } = req.body;
+  if (password !== 'zak56belf') return res.status(401).json({ error: 'Unauthorized' });
+  await WorkItem.findByIdAndDelete(req.params.id);
+  res.json({ ok: true });
+});
+
+app.get('/api/payment', async (req, res) => {
+  const data = await getGlobalData();
+  res.json(data.payment);
+});
+
+app.post('/api/payment', async (req, res) => {
+  const { password, paypal, robux, bank } = req.body;
+  if (password !== 'zak56belf') return res.status(401).json({ error: 'Unauthorized' });
+  const data = await getGlobalData();
+  data.payment = { paypal, robux, bank };
+  await data.save();
+  res.json({ ok: true });
+});
+
+app.get('/api/views', async (req, res) => {
+  const data = await getGlobalData();
+  res.json({ views: data.views });
+});
+
+app.post('/api/views', async (req, res) => {
+  const data = await getGlobalData();
+  data.views += 1;
+  await data.save();
+  res.json({ views: data.views });
+});
+
+// MUST EXPORT APP FOR VERCEL (Do not use app.listen)
+module.exports = app;
