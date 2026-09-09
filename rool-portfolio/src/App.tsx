@@ -22,7 +22,7 @@ const TRACKS = [
   "https://videotourl.com/audio/1788977556485-4320f3b0-f87c-4791-8510-ab78e8fc22e9.mp3"
 ];
 
-const WEBSITE_TITLE = "Your Name | Portfolio"; 
+const WEBSITE_TITLE = "Zakaria | Portfolio"; 
 
 export default function App() {
   const [items, setItems] = useState<WorkItem[]>([]);
