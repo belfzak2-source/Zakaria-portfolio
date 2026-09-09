@@ -1,136 +1,107 @@
 import type { WorkItem, Stats, Payment } from './types';
 
-const MOCK_ITEMS: WorkItem[] = [
-  {
-    _id: 'm1', title: 'Combat System', category: 'Scripting',
-    description: 'Advanced melee & ranged combat with combos, knockback, and smooth animations.',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=480&h=280&fit=crop&auto=format',
-    role: 'Solo', createdAt: '',
-  },
-  {
-    _id: 'm2', title: 'Character Rig & Anims', category: 'Animations',
-    description: 'Full R15 rig with idle, walk, run, jump, and attack animations blended seamlessly.',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=480&h=280&fit=crop&auto=format',
-    role: 'Solo', createdAt: '',
-  },
-  {
-    _id: 'm3', title: 'RPG Inventory UI', category: 'Ui',
-    description: 'Drag-and-drop inventory with hotbar, item tooltips, and animated transitions.',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?w=480&h=280&fit=crop&auto=format',
-    role: 'Solo', createdAt: '',
-  },
-  {
-    _id: 'm4', title: 'Game Logo Pack', category: 'Grafics',
-    description: 'Complete brand identity — icon, banner, thumbnail, and social assets.',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=480&h=280&fit=crop&auto=format',
-    role: 'Solo', createdAt: '',
-  },
-  {
-    _id: 'm5', title: 'NPC AI System', category: 'Scripting',
-    description: 'Pathfinding NPCs with patrol, detect, chase, and flee states.',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=480&h=280&fit=crop&auto=format',
-    role: '80% Scripter', createdAt: '',
-  },
-  {
-    _id: 'm6', title: 'Void Odyssey', category: 'game',
-    description: 'Space exploration adventure — mine asteroids, build ships, fight pirates.',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=480&h=280&fit=crop&auto=format',
-    role: 'Solo Dev', createdAt: '', gameLink: 'https://www.roblox.com/games',
-  },
-];
-
-const STORAGE_KEY = 'rool_work_items';
-
-const getStoredWork = (): WorkItem[] => {
-  try {
-    const data = localStorage.getItem(STORAGE_KEY);
-    if (!data) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(MOCK_ITEMS));
-      return MOCK_ITEMS;
-    }
-    return JSON.parse(data);
-  } catch {
-    return MOCK_ITEMS;
-  }
-};
-
-const saveStoredWork = (items: WorkItem[]) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-};
+const API_URL = 'http://localhost:5000/api';
 
 export const api = {
-views: async () => {
+  views: async () => {
     try {
-      // 1. Get current views (Defaults to 0)
-      let currentViews = parseInt(localStorage.getItem('rool_views') || '0', 10);
-      
-      // 2. Check the time lock
       const lastViewTime = localStorage.getItem('last_view_time');
       const now = Date.now();
-      const ONE_DAY = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+      const ONE_DAY = 24 * 60 * 60 * 1000; 
 
-      // 3. If they never visited OR 24 hours have passed -> Add +1
       if (!lastViewTime || now - parseInt(lastViewTime, 10) >= ONE_DAY) {
-        currentViews += 1;
-        localStorage.setItem('rool_views', currentViews.toString());
-        localStorage.setItem('last_view_time', now.toString()); // Lock it for next 24 hours
+        // 24 hours passed or new user: Tell server to add +1
+        const res = await fetch(`${API_URL}/views`, { method: 'POST' });
+        const data = await res.json();
+        localStorage.setItem('last_view_time', now.toString()); 
+        return { views: data.views };
+      } else {
+        // Cooldown active: Just grab the current count without adding
+        const res = await fetch(`${API_URL}/views`);
+        const data = await res.json();
+        return { views: data.views };
       }
-
-      return { views: currentViews };
     } catch {
       return { views: 0 };
     }
   },
 
   stats: async () => {
-    const raw = localStorage.getItem('rool_stats');
-    return raw ? JSON.parse(raw) : { gamesMade: '12', visitCount: '4.2K', experienceYears: '3+ Yrs' };
+    try {
+      const res = await fetch(`${API_URL}/stats`);
+      return await res.json();
+    } catch {
+      return { gamesMade: '0', visitCount: '0', experienceYears: '0' };
+    }
   },
 
   work: async () => {
-    return getStoredWork();
+    try {
+      const res = await fetch(`${API_URL}/work`);
+      return await res.json();
+    } catch {
+      return []; // Starts empty since Mock items are removed!
+    }
   },
 
   payment: async () => {
-    const raw = localStorage.getItem('rool_payment');
-    return raw ? JSON.parse(raw) : { paypal: 'belfzak2@gmail.com', robux: 'Group Funds / Gamepass', bank: 'DM for wire details' };
+    try {
+      const res = await fetch(`${API_URL}/payment`);
+      return await res.json();
+    } catch {
+      return { paypal: '', robux: '', bank: '' };
+    }
   },
 
   publishWork: async (data: any) => {
-    if (data.password !== 'zak56belf') return { ok: false };
-    const current = getStoredWork();
-    const newItem: WorkItem = {
-      _id: Date.now().toString(),
-      title: data.title,
-      category: data.category,
-      role: data.role,
-      thumbnailUrl: data.thumbnailUrl,
-      videoUrl: data.videoUrl,
-      gameLink: data.gameLink,
-      description: data.description,
-      createdAt: new Date().toISOString(),
-    };
-    saveStoredWork([newItem, ...current]);
-    return { ok: true };
+    try {
+      const res = await fetch(`${API_URL}/work`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      return await res.json();
+    } catch {
+      return { ok: false };
+    }
   },
 
   deleteWork: async (id: string, password: string) => {
-    if (password !== 'zak56belf') return { ok: false };
-    const current = getStoredWork();
-    const updated = current.filter(item => item._id !== id);
-    saveStoredWork(updated);
-    return { ok: true };
+    try {
+      const res = await fetch(`${API_URL}/work/${id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+      return await res.json();
+    } catch {
+      return { ok: false };
+    }
   },
 
   updateStats: async (data: any) => {
-    if (data.password !== 'zak56belf') return { ok: false };
-    localStorage.setItem('rool_stats', JSON.stringify(data));
-    return { ok: true };
+    try {
+      const res = await fetch(`${API_URL}/stats`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      return await res.json();
+    } catch {
+      return { ok: false };
+    }
   },
 
   updatePayment: async (data: any) => {
-    if (data.password !== 'zak56belf') return { ok: false };
-    localStorage.setItem('rool_payment', JSON.stringify(data));
-    return { ok: true };
+    try {
+      const res = await fetch(`${API_URL}/payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      return await res.json();
+    } catch {
+      return { ok: false };
+    }
   }
 };
