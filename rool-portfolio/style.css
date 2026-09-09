@@ -7,6 +7,7 @@ body, html {
     scroll-behavior: smooth;
 }
 
+/* Background image with blur effect */
 .bg-image {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
     background-image: url('https://cdn.corenexis.com/f/ydHnGKD6ymI.png');
@@ -15,18 +16,19 @@ body, html {
     z-index: -2;
 }
 
+/* Gradient from bottom to top dark */
 .bg-gradient {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: linear-gradient(to top, rgba(13, 14, 18, 0.98) 20%, rgba(13, 14, 18, 0.5) 100%);
+    background: linear-gradient(to top, rgba(13, 14, 18, 0.98) 20%, rgba(13, 14, 18, 0.4) 100%);
     z-index: -1;
 }
 
-/* Top Bar */
+/* Top Bar Navigation */
 .top-bar {
     position: fixed; top: 0; width: 100%; padding: 16px 32px;
     display: flex; justify-content: space-between; align-items: center;
-    background: rgba(13, 14, 18, 0.6);
-    backdrop-filter: blur(10px);
+    background: rgba(13, 14, 18, 0.7);
+    backdrop-filter: blur(12px);
     z-index: 100;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -37,13 +39,15 @@ body, html {
     display: flex; align-items: center; gap: 6px;
     background: rgba(255, 255, 255, 0.1); border: none; color: #fff;
     padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 600;
+    transition: background 0.2s;
 }
+.back-btn:hover { background: rgba(255, 255, 255, 0.2); }
 
 .nav-right { display: flex; align-items: center; gap: 16px; }
 .nav-icon { width: 20px; height: 20px; stroke: #a0a5b5; }
 .divider { color: rgba(255, 255, 255, 0.2); }
 
-.audio-controls { display: flex; align-items: center; gap: 8px; position: relative; }
+.audio-controls { display: flex; align-items: center; gap: 8px; position: relative; cursor: pointer; }
 #volume-slider {
     width: 0; opacity: 0; transition: all 0.3s ease;
     accent-color: #00a2ff; cursor: pointer;
@@ -52,13 +56,17 @@ body, html {
 
 .view-count { display: flex; align-items: center; gap: 6px; font-weight: 600; color: #a0a5b5; }
 
-/* Hero */
+/* Hero Section */
 .hero {
     height: 100vh; display: flex; flex-direction: column;
     justify-content: center; align-items: center; text-align: center;
     padding: 0 20px;
 }
-.title { font-size: 4.5rem; font-weight: 800; margin-bottom: 12px; background: linear-gradient(135deg, #ffffff, #a0a5b5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.title { 
+    font-size: 4.5rem; font-weight: 800; margin-bottom: 12px; 
+    background: linear-gradient(135deg, #ffffff, #a0a5b5); 
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+}
 .subtitle { font-size: 1.25rem; max-width: 650px; color: #b0b5c5; margin-bottom: 32px; line-height: 1.6; }
 
 .hero-buttons { display: flex; gap: 16px; }
@@ -70,8 +78,10 @@ body, html {
 .btn-primary:hover { background: #0088d6; transform: translateY(-2px); }
 .btn-secondary { background: rgba(255, 255, 255, 0.1); color: #fff; backdrop-filter: blur(5px); }
 .btn-secondary:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-2px); }
+.btn-roblox { background: #00b06f; color: #fff; }
+.btn-roblox:hover { background: #008f5a; }
 
-/* Stats */
+/* Stats Section[cite: 8] */
 .stats-section { padding: 40px 20px; }
 .stats-grid { display: flex; justify-content: center; gap: 24px; max-width: 900px; margin: 0 auto; flex-wrap: wrap; }
 .stat-card {
@@ -82,7 +92,7 @@ body, html {
 .stat-card h3 { font-size: 2.8rem; color: #00a2ff; margin-bottom: 6px; }
 .stat-card p { color: #a0a5b5; font-weight: 600; }
 
-/* Sections & Grids */
+/* Section & Grids[cite: 8] */
 .section { padding: 80px 40px; max-width: 1200px; margin: 0 auto; }
 .section-title { font-size: 2.2rem; margin-bottom: 30px; text-align: center; }
 
@@ -104,23 +114,31 @@ body, html {
 .card-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 6px; }
 .card-role { display: inline-block; background: rgba(0, 162, 255, 0.15); color: #00a2ff; font-size: 0.8rem; font-weight: 700; padding: 4px 8px; border-radius: 4px; }
 
-/* Payments */
+/* Payment Section[cite: 8] */
 .payment-grid { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
 .payment-card { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); padding: 24px; border-radius: 12px; text-align: center; min-width: 220px; }
 .payment-title { font-size: 1.2rem; font-weight: 700; color: #00a2ff; margin-bottom: 8px; }
 
-/* Contact */
+/* Contact Section[cite: 8] */
 .contact-container { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
 .contact-card { display: flex; align-items: center; gap: 12px; padding: 16px 28px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; color: #fff; text-decoration: none; font-weight: 600; transition: 0.2s; }
 .contact-card:hover { background: rgba(255, 255, 255, 0.12); }
 
-/* Modal */
+/* Modals (Roblox Game Page Style & Admin Overlay)[cite: 8] */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 20px; }
-.modal-content { background: #14161d; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; max-width: 750px; width: 100%; overflow: hidden; position: relative; }
+.modal-content { background: #14161d; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; max-width: 750px; width: 100%; overflow: hidden; position: relative; padding: 24px; }
 .modal-close { position: absolute; top: 12px; right: 16px; background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer; z-index: 10; }
-.modal-media video, .modal-media img { width: 100%; max-height: 380px; object-fit: cover; display: block; }
-.modal-details { padding: 24px; }
+.modal-media video, .modal-media img { width: 100%; max-height: 380px; object-fit: cover; border-radius: 8px; display: block; }
+.modal-details { padding-top: 16px; }
 .modal-badge { background: #00a2ff; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; margin-top: 8px; display: inline-block; }
 #modal-description { margin: 16px 0; color: #b0b5c5; line-height: 1.6; }
+
+/* Admin Modal Inputs */
+.admin-style input, .admin-style select, .admin-style textarea {
+    width: 100%; padding: 10px; margin-top: 8px; margin-bottom: 12px;
+    border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #1e222d; color: #fff;
+}
+.admin-tabs { display: flex; gap: 8px; margin: 16px 0; }
 
 .hidden { display: none !important; }
