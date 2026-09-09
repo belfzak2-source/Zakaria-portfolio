@@ -1,10 +1,11 @@
 {
+  "title": "Zakaria ProtoProfile",
   "description": "Welcome to my official portfolio featuring my projects, work, and creations.",
-  "robots": {
-    "index": false
+  "language": "en",
+  "icons": {
+    "icon": "YOUR_IMAGE_OR_FAVICON_URL_HERE"
   },
-  "accessibility": {
-    "addBypassLinks": false,
-    "ignoreReducedMotion": false
+  "openGraph": {
+    "image": "YOUR_IMAGE_OR_EMBED_URL_HERE"
   }
 }
