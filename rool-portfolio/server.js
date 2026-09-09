@@ -1,120 +1,104 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const fs = require('fs');
-const path = require('path');
+const mongoose = require('mongoose');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const DATA_FILE = path.join(__dirname, 'data.json');
+// 1. Connect to MongoDB Atlas
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('✅ Connected to MongoDB Atlas'))
+  .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// Helper function to read data from data.json
-function loadDataFromFile() {
-  if (!fs.existsSync(DATA_FILE)) {
-    const defaultData = {
+// 2. Define Database Blueprints (Schemas)
+const WorkItem = mongoose.model('WorkItem', new mongoose.Schema({
+  title: String, category: String, role: String,
+  thumbnailUrl: String, videoUrl: String, gameLink: String,
+  description: String, createdAt: { type: Date, default: Date.now }
+}));
+
+const GlobalData = mongoose.model('GlobalData', new mongoose.Schema({
+  views: { type: Number, default: 0 },
+  stats: { gamesMade: String, visitCount: String, experienceYears: String },
+  payment: { paypal: String, robux: String, bank: String }
+}));
+
+// Helper to get or create global settings
+async function getGlobalData() {
+  let data = await GlobalData.findOne();
+  if (!data) {
+    data = await GlobalData.create({
       views: 0,
       stats: { gamesMade: '0', visitCount: '0', experienceYears: '0' },
-      work: [],
       payment: { paypal: '', robux: '', bank: '' }
-    };
-    fs.writeFileSync(DATA_FILE, JSON.stringify(defaultData, null, 2));
-    return defaultData;
+    });
   }
-  
-  try {
-    const rawData = fs.readFileSync(DATA_FILE, 'utf8');
-    return JSON.parse(rawData);
-  } catch (err) {
-    console.error('Error reading JSON file, returning empty state:', err);
-    return { views: 0, stats: {}, work: [], payment: {} };
-  }
-}
-
-// Helper function to save updated data back to data.json
-function saveDataToFile(data) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+  return data;
 }
 
 // --- API ENDPOINTS ---
 
-// GET Stats
-app.get('/api/stats', (req, res) => {
-  const db = loadDataFromFile();
-  res.json(db.stats);
+app.get('/api/stats', async (req, res) => {
+  const data = await getGlobalData();
+  res.json(data.stats);
 });
 
-// POST Stats
-app.post('/api/stats', (req, res) => {
+app.post('/api/stats', async (req, res) => {
   const { password, gamesMade, visitCount, experienceYears } = req.body;
   if (password !== 'zak56belf') return res.status(401).json({ error: 'Unauthorized' });
-
-  const db = loadDataFromFile();
-  db.stats = { gamesMade, visitCount, experienceYears };
-  saveDataToFile(db);
-
-  res.json({ ok: true, stats: db.stats });
+  const data = await getGlobalData();
+  data.stats = { gamesMade, visitCount, experienceYears };
+  await data.save();
+  res.json({ ok: true, stats: data.stats });
 });
 
-// GET Work items
-app.get('/api/work', (req, res) => {
-  const db = loadDataFromFile();
-  res.json(db.work);
+app.get('/api/work', async (req, res) => {
+  const items = await WorkItem.find().sort({ createdAt: -1 }); // Newest first
+  res.json(items);
 });
 
-// POST Work item
-app.post('/api/work', (req, res) => {
+app.post('/api/work', async (req, res) => {
   const { password, title, category, role, thumbnailUrl, videoUrl, gameLink, description } = req.body;
   if (password !== 'zak56belf') return res.status(401).json({ error: 'Unauthorized' });
-
-  const db = loadDataFromFile();
-  const newItem = {
-    _id: Date.now().toString(),
-    title, category, role, thumbnailUrl, videoUrl, gameLink, description
-  };
-
-  db.work.unshift(newItem); // Add new item to top
-  saveDataToFile(db);
-
+  const newItem = await WorkItem.create({ title, category, role, thumbnailUrl, videoUrl, gameLink, description });
   res.json({ ok: true, item: newItem });
 });
 
-// DELETE Work item
-app.delete('/api/work/:id', (req, res) => {
+app.delete('/api/work/:id', async (req, res) => {
   const { password } = req.body;
   if (password !== 'zak56belf') return res.status(401).json({ error: 'Unauthorized' });
-
-  const db = loadDataFromFile();
-  db.work = db.work.filter(item => item._id !== req.params.id);
-  saveDataToFile(db);
-
+  await WorkItem.findByIdAndDelete(req.params.id);
   res.json({ ok: true });
 });
 
-// GET Payment details
-app.get('/api/payment', (req, res) => {
-  const db = loadDataFromFile();
-  res.json(db.payment);
+app.get('/api/payment', async (req, res) => {
+  const data = await getGlobalData();
+  res.json(data.payment);
 });
 
-// POST Payment details
-app.post('/api/payment', (req, res) => {
+app.post('/api/payment', async (req, res) => {
   const { password, paypal, robux, bank } = req.body;
   if (password !== 'zak56belf') return res.status(401).json({ error: 'Unauthorized' });
-
-  const db = loadDataFromFile();
-  db.payment = { paypal, robux, bank };
-  saveDataToFile(db);
-
+  const data = await getGlobalData();
+  data.payment = { paypal, robux, bank };
+  await data.save();
   res.json({ ok: true });
 });
 
-// Increment views
-app.post('/api/views', (req, res) => {
-  const db = loadDataFromFile();
-  db.views = (db.views || 0) + 1;
-  saveDataToFile(db);
-  res.json({ views: db.views });
+// Get current views without incrementing
+app.get('/api/views', async (req, res) => {
+  const data = await getGlobalData();
+  res.json({ views: data.views });
+});
+
+// Increment views by 1
+app.post('/api/views', async (req, res) => {
+  const data = await getGlobalData();
+  data.views += 1;
+  await data.save();
+  res.json({ views: data.views });
 });
 
 const PORT = 5000;
