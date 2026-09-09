@@ -1,6 +1,6 @@
-const express = require('express');
-const cors = require('cors');
-const mongoose = require('mongoose');
+import express from 'express';
+import cors from 'cors';
+import mongoose from 'mongoose';
 
 const app = express();
 app.use(cors());
@@ -110,5 +110,5 @@ app.post('/api/views', async (req, res) => {
   res.json({ views: data.views });
 });
 
-// MUST EXPORT APP FOR VERCEL (Do not use app.listen)
-module.exports = app;
+// MUST EXPORT APP FOR VERCEL
+export default app;
