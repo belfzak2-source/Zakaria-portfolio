@@ -22,7 +22,6 @@ const TRACKS = [
   "https://videotourl.com/audio/1788977556485-4320f3b0-f87c-4791-8510-ab78e8fc22e9.mp3"
 ];
 
-// Change this to your preferred website title
 const WEBSITE_TITLE = "Your Name | Portfolio"; 
 
 export default function App() {
@@ -52,11 +51,10 @@ export default function App() {
   useEffect(() => {
     const initialTrack = TRACKS[currentTrackIndexRef.current];
     const audio = new Audio(initialTrack);
-    audio.loop = false; // Disable single track loop to allow auto-play next track
+    audio.loop = false;
     audio.volume = volume;
     audioRef.current = audio;
 
-    // Play next track in sequence when current track ends
     const handleEnded = () => {
       currentTrackIndexRef.current = (currentTrackIndexRef.current + 1) % TRACKS.length;
       audio.src = TRACKS[currentTrackIndexRef.current];
@@ -84,24 +82,17 @@ export default function App() {
     };
   }, []);
 
-  // Update volume on audio instance when volume state changes
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume;
     }
   }, [volume]);
 
-  // ── Secret Admin Shortcut (Shift + A) ─────────────────────────
+  // ── Admin Toggle Shortcut (Shift + A) ──────────────────────────
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.shiftKey && e.key.toUpperCase() === 'A') {
-        const pass = prompt("Enter Admin Password:");
-        if (pass === "zak56belf") {
-          alert("Admin Access Granted.");
-          setAdminOpen(true);
-        } else if (pass !== null) {
-          alert("Incorrect Admin Password.");
-        }
+        setAdminOpen(prev => !prev);
       }
     };
 
@@ -113,13 +104,18 @@ export default function App() {
   useEffect(() => {
     const obs = new IntersectionObserver(
       entries => entries.forEach(e => {
-        if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+        if (e.isIntersecting) { 
+          e.target.classList.add('visible'); 
+          obs.unobserve(e.target); 
+        }
       }),
       { threshold: 0.1 }
     );
+
     const refresh = () => {
       document.querySelectorAll('.reveal:not(.visible)').forEach(el => obs.observe(el));
     };
+
     refresh();
     const timer = setInterval(refresh, 1000);
     return () => { obs.disconnect(); clearInterval(timer); };
@@ -134,7 +130,10 @@ export default function App() {
         api.work(),
         api.payment(),
       ]);
-      if (viewsData?.views) setViews(viewsData.views);
+      
+      if (viewsData && typeof viewsData.views === 'number') {
+        setViews(viewsData.views);
+      }
       if (statsData) setStats(statsData);
       if (workData) setItems(workData);
       if (payData) setPayment(payData);
