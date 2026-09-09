@@ -1,44 +1,139 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Rool-Studio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rool-Studio | Roblox Developer Portfolio</title>
     <link rel="stylesheet" href="style.css">
-    <!-- GSAP for Sick Animations -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 </head>
 <body>
-    <!-- Background -->
     <div class="bg-image"></div>
     <div class="bg-gradient"></div>
 
-    <!-- Top Bar -->
+    <!-- Top Navigation Bar -->
     <nav class="top-bar">
-        <div class="logo" id="nav-logo">@Rool-Studio</div>
+        <div class="nav-left">
+            <button id="back-btn" class="back-btn hidden" onclick="resetWorkView()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                Back
+            </button>
+            <div class="logo" id="nav-logo">@Rool-Studio</div>
+        </div>
         <div class="nav-right">
             <div class="audio-controls">
-                <span id="sound-icon">🔊</span>
+                <span class="icon-wrapper">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                </span>
                 <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.2">
             </div>
+            <div class="divider">|</div>
             <div class="view-count">
-                <span>👁️ <span id="views">Loading...</span></span>
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <span id="views-count">...</span>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <header class="hero">
+    <header class="hero" id="hero">
         <h1 class="title">Rool-Studio</h1>
         <p class="subtitle">A Pretty talented roblox developer make cool stuff Scripting/animating/Ui/Grafics</p>
         <div class="hero-buttons">
-            <button onclick="scrollToSection('work')">View Our Work</button>
-            <button onclick="scrollToSection('contact')">Get in Touch With Us</button>
+            <button class="btn btn-primary" onclick="scrollToSection('work-section')">View Our Work</button>
+            <button class="btn btn-secondary" onclick="scrollToSection('contact-section')">Get in Touch With Us</button>
         </div>
     </header>
 
-    <!-- Add your Stats, Work, and Games sections down here -->
-    
+    <!-- Stats Section -->
+    <section class="stats-section" id="stats-section">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3 id="stat-games">0</h3>
+                <p>Games Made</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="stat-visits">0</h3>
+                <p>Visit Count</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="stat-experience">0</h3>
+                <p>Years Experience</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Commissions / Work Section -->
+    <section class="section" id="work-section">
+        <h2 class="section-title">Commissions & Showcase</h2>
+        <div class="category-tabs">
+            <button class="tab-btn active" onclick="filterCategory('all')">All</button>
+            <button class="tab-btn" onclick="filterCategory('Scripting')">Scripting</button>
+            <button class="tab-btn" onclick="filterCategory('Animations')">Animations</button>
+            <button class="tab-btn" onclick="filterCategory('Ui')">UI</button>
+            <button class="tab-btn" onclick="filterCategory('Grafics')">Graphics</button>
+        </div>
+        <div class="card-grid" id="commissions-grid"></div>
+    </section>
+
+    <!-- Made Games Section -->
+    <section class="section" id="games-section">
+        <h2 class="section-title">Made Games</h2>
+        <div class="card-grid" id="games-grid"></div>
+    </section>
+
+    <!-- Payment Methods Section -->
+    <section class="section" id="payment-section">
+        <h2 class="section-title">Accepted Payment Methods</h2>
+        <div class="payment-grid" id="payment-grid">
+            <div class="payment-card">
+                <div class="payment-title">PayPal</div>
+                <div class="payment-detail" id="pay-paypal">Accepted</div>
+            </div>
+            <div class="payment-card">
+                <div class="payment-title">Robux</div>
+                <div class="payment-detail" id="pay-robux">Group Funds / Gamepass</div>
+            </div>
+            <div class="payment-card">
+                <div class="payment-title">Bank Transfer</div>
+                <div class="payment-detail" id="pay-bank">Direct Wire</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="section" id="contact-section">
+        <h2 class="section-title">Get in Touch With Us</h2>
+        <div class="contact-container">
+            <a href="https://discord.com/invite/TpBRMN48Vv" target="_blank" class="contact-card discord">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.093.252-.19.372-.287a.075.075 0 0 1 .078-.01c3.927 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .079.009c.12.098.245.195.372.288a.077.077 0 0 1-.006.128 12.299 12.299 0 0 1-1.873.891.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+                <span>Join our Discord</span>
+            </a>
+            <a href="mailto:belfzak2@gmail.com" class="contact-card email">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                <span>belfzak2@gmail.com</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- Roblox Game-Style Detail Modal -->
+    <div class="modal-overlay hidden" id="item-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <div class="modal-media">
+                <video id="modal-video" controls autoplay loop muted></video>
+                <img id="modal-image" src="" alt="Work Preview">
+            </div>
+            <div class="modal-details">
+                <h2 id="modal-title">Item Title</h2>
+                <span class="modal-badge" id="modal-role">Role</span>
+                <p id="modal-description">Description goes here...</p>
+                <a id="modal-game-link" href="#" target="_blank" class="btn btn-primary hidden">Play Game</a>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
