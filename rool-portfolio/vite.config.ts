@@ -4,16 +4,15 @@ import tailwindcss from '@tailwindcss/vite'
 import path from 'node:path'
 import fs from 'node:fs'
 
-// Load figma/make/site.json using fs so build tools don't try to import missing files statically
+// Safely load the site config using fs so Vercel doesn't crash
 let siteConfiguration: FigmaSiteConfiguration = {}
 const siteConfigPath = path.resolve(__dirname, './figma/make/site.json')
+const fallbackConfigPath = path.resolve(__dirname, './.figma/make/site.json')
 
 if (fs.existsSync(siteConfigPath)) {
-  try {
-    siteConfiguration = JSON.parse(fs.readFileSync(siteConfigPath, 'utf-8'))
-  } catch (err) {
-    console.warn('Failed to parse figma/make/site.json:', err)
-  }
+  try { siteConfiguration = JSON.parse(fs.readFileSync(siteConfigPath, 'utf-8')) } catch (err) {}
+} else if (fs.existsSync(fallbackConfigPath)) {
+  try { siteConfiguration = JSON.parse(fs.readFileSync(fallbackConfigPath, 'utf-8')) } catch (err) {}
 }
 
 export default defineConfig(({ mode }) => {
