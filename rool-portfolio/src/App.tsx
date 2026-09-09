@@ -19,7 +19,8 @@ import Toast from './components/Toast';
 const TRACKS = [
   "https://videotourl.com/audio/1788966590049-a2ac9e4d-1a4d-469f-b9a0-c6a873dfa743.mp3",
   "https://videotourl.com/audio/1788977518911-95c68b5c-35e2-4c8a-8390-d965ea3083fa.mp3",
-  "https://videotourl.com/audio/1788977556485-4320f3b0-f87c-4791-8510-ab78e8fc22e9.mp3"
+  "https://videotourl.com/audio/1788977556485-4320f3b0-f87c-4791-8510-ab78e8fc22e9.mp3",
+  "https://videotourl.com/audio/1788966579029-953def23-b443-4d2d-9df5-3ff3dcddf4ea.mp3"
 ];
 
 const WEBSITE_TITLE = "Zakaria | Portfolio"; 
