@@ -4,9 +4,10 @@ import tailwindcss from '@tailwindcss/vite'
 import path from 'node:path'
 import fs from 'node:fs'
 
-// Safely load figma/make/site.json if present
+// Load figma/make/site.json using fs so build tools don't try to import missing files statically
 let siteConfiguration: FigmaSiteConfiguration = {}
 const siteConfigPath = path.resolve(__dirname, './figma/make/site.json')
+
 if (fs.existsSync(siteConfigPath)) {
   try {
     siteConfiguration = JSON.parse(fs.readFileSync(siteConfigPath, 'utf-8'))
