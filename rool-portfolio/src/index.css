@@ -117,7 +117,7 @@ a { color: inherit; text-decoration: none; }
 }
 @keyframes eq-bounce {
   0%, 100% { height: 25%; }
-  50%       { height: 100%; }
+  50%        { height: 100%; }
 }
 @keyframes cue-drop {
   0%   { opacity: 1; top: 6px; }
@@ -131,7 +131,7 @@ a { color: inherit; text-decoration: none; }
 }
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-7px); }
+  50%        { transform: translateY(-7px); }
 }
 @keyframes shimmer {
   0%   { background-position: -400% 0; }
