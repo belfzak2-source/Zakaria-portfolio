@@ -60,7 +60,7 @@ a { color: inherit; text-decoration: none; }
   background-image: url('https://cdn.corenexis.com/f/ydHnGKD6ymI.png');
   background-size: cover;
   background-position: center;
-  filter: blur(20px) brightness(0.38) saturate(1.2);
+  filter: blur(7px) brightness(0.5) saturate(1.8);
   transform: scale(1.1);
   z-index: -3;
   pointer-events: none;
